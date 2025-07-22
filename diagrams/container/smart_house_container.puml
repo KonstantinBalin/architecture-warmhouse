@@ -1,0 +1,93 @@
+@startuml
+title Диаграмма контейнеров С4 для системы умный дом
+
+top to bottom direction
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "Пользователь", "Пользователь системы")
+Person(admin, "Администратор", "Адмнинистратор системы")
+System(smartHouseSystem, "Умный дом", "Система управления умным домом")
+
+Container_Boundary(smartHouseSystem, "Система умный дом") {
+
+  Container(webApp, "Web приложение", "Flutter, Dart", "Web версия приложения для взаимодействия с пользователем")
+  Container(mobileApp, "Mobile приложение", "Flutter, Dart", "Mobile версия приложения для взаимодействия с пользователемОбработка запросов пользователя")
+  Container(webAdministrationPanel, "Web Administration panel", "Flutter, Dart", "Web версия для приложения для администрирования системы")
+
+  Container(payment, "Сервис оплаты", "Java, Spring", "Обработака платежей")
+
+  Container(telemetry, "Сервис работы с телемитрией", "Java, Spring", "Обработка данных с умых устройств, управление умными устрйоствами")
+
+  Container(deviceManagement, "Сервис управления устройствами", "Java, Spring", "Добавление/редактирование/удаление устройств и их контрактов")
+
+  Container(automation, "Сервис автоматизации", "Java, Spring", "Создание/редактирование/удаление сценариев")
+
+  Container(notification, "Сервис оповещения", "Java, Spring", "Отправка оповещений")
+
+  Container(publicApiGateway, "Публичное API + Security", "Java, Spring", "Публичное API для интергации внешних систем")
+  Container(apiGateway, "Внутренний Api", "Integration Layer", "Внутреннее API для работы с модулями системы")
+  Container(auth, "Сервис аутентификации и авторизации", "Java, Spring, OAuth 2", "API для работы с пользователями")
+
+  ContainerDb(postgre, "PostgreSQL", "", "Храниение реляционных данных")
+  ContainerDb(сassandra, "Cassandra", "", "Храниение информации с датчиков")
+  ContainerQueue(kafka, "kafka","", "Обмен сообщениями между сервисами")
+
+
+}
+Container_Boundary(smartHouseSystemExternalPart, "Умный дом, сервисы и устройства на стороне клиента") {
+  Container(hubApp, "Hub", "Wi-Fi, Zigbee, Bluetooth, Matter", "Управляет устройствами, отвечает за связь, выполняет команды")
+  Container(device, "Устройство", "Умное устройство", "Устройство для умного дома")
+}
+System_Ext(sms, "SMS шлюз", "Сервис для оповешения по SMS")
+System_Ext(push, "Push сервис", "Сервис для отправки push уведомлений")
+System_Ext(email, "Email сервис", "Сервис отправки e-mail собщений")
+System_Ext(bank, "Платежный шлюз", "Система для оплаты подписки")
+System_Ext(thirdParty, "Сторонние сисиемы", "Внешняя система")
+
+
+
+Rel(user, webApp, "Управление устройствами, подключение новых, настройка сценариев автоматизации, оплата подписки", "HTTPS, WebTransport")
+Rel(user, mobileApp, "Управление устройствами, подключение новых, настройка сценариев автоматизации, оплата подписки" , "HTTPS, WebTransport")
+Rel(admin, webAdministrationPanel, "Управление системой","HTTPS")
+
+Rel(webApp, apiGateway, "Управление устройствами, подключение новых, настройка сценариев автоматизации, оплата подписки", "HTTPS, WebTransport")
+Rel(mobileApp, apiGateway, "Управление устройствами, подключение новых, настройка сценариев автоматизации, оплата подписки", "HTTPS, WebTransport")
+Rel(webAdministrationPanel, apiGateway, "Управление системой","HTTPS")
+
+Rel(apiGateway, payment, "Отправка платежей","HTTPS")
+Rel(apiGateway, deviceManagement, "Добавление/редактирование/удаление устройств и их контрактов")
+Rel(apiGateway, automation, "Создание/редактирование/удаление сценариев")
+Rel(apiGateway, auth, "Получение, проверка токена")
+Rel(apiGateway, telemetry, "Получени метаданных")
+
+Rel(auth, postgre, "Хранение пользователей")
+
+Rel(publicApiGateway, apiGateway,"Добавление контрактов по новым устройствам", "HTTPS, WebTransport")
+
+Rel(payment, bank, "Оплата подписки")
+Rel(payment, "kafka", "Отправка информации по платежах и статусах в сервис оповещений")
+
+Rel(automation, postgre, "Сохранение скриптов автоматизации")
+
+
+Rel(notification, sms, "Отправка SMS уведомлений")
+Rel(notification, push, "Отправка PUSH уведомлений")
+Rel(notification, email, "Потправка сообщений по почте")
+Rel(thirdParty, publicApiGateway , "Подключение сторонних приложений, регистрация новых контрактов для новых устройств", "HTTPS")
+
+Rel(deviceManagement, postgre, "Сохранение/редактирование/удаление данных об устройствах и их контрактов")
+
+
+Rel(telemetry, "сassandra", "Сохранение данных от устройств")
+
+Rel(kafka, notification, "Отправка сообщений через разные каналы")
+
+Rel(apiGateway, hubApp, "Управление устройствами")
+Rel(apiGateway, hubApp, "Управление устройствами через сценарии")
+Rel(hubApp, apiGateway, "Получение данных от устройств умного дома, Управление устройствам")
+
+
+Rel(hubApp, device , "Управление устройством, получение данных с устройста", "Zigbee, Z-Wave, Matter")
+
+@enduml

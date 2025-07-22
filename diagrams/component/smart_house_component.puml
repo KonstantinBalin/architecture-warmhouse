@@ -1,0 +1,35 @@
+@startuml
+!include <C4/C4_Component>
+
+title Компонентная диаграмма C4 для сервиса телеметрии
+
+Container_Boundary(telemetryService, "Сервис телеметрии", "Spring Boot") {
+
+    Component(apiGateway, "API Gateway", "REST API", "Единая точка входа для запросов")
+    Component(telemetryCollector, "Сборщик телеметрии", "Kafka Consumer", "Прием данных с устройств")
+    Component(dataProcessor, "Data Processor", "Stream Processing", "Обработка и обогащение данных")
+    Component(alertService, "Alert Service", "Business Logic", "Генерация оповещений")
+    Component(metricsStorage, "Metrics Storage", "Cassandra", "Хранение временных рядов")
+    Component(configService, "Config Service", "Microservice", "Управление конфигурацией")
+
+}
+
+Component(iotDevice, "IoT Устройство", "Отправка телеметрии")
+Component(kafkaCluster, "Kafka Cluster", "Брокер сообщений")
+Component(notificationService, "Notification Service", "Kafka Consumer", "Отправка уведомлений")
+Component(metadataDb, "Metadata DB", "PostgreSQL", "Хранение метаданных")
+
+Rel(iotDevice, apiGateway, "HTTPS/POST", "Данные телеметрии")
+Rel(apiGateway, telemetryCollector, "Kafka Producer", "Сырые данные")
+Rel(telemetryCollector, dataProcessor, "Kafka Streams", "Обработка в реальном времени")
+Rel(dataProcessor, metricsStorage, "CQL", "Сохранение метрик")
+Rel(dataProcessor, alertService, "gRPC", "Триггеры оповещений")
+Rel(alertService, notificationService, "Kafka Producer", "Уведомления")
+Rel(configService, dataProcessor, "HTTP", "Конфигурация правил")
+
+Rel(telemetryCollector, kafkaCluster, "Kafka Protocol", "Чтение/запись")
+
+Rel(configService, metadataDb, "JDBC", "Хранение конфигов")
+
+
+@enduml

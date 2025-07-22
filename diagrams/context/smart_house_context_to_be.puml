@@ -1,0 +1,22 @@
+@startuml
+
+title Контекстная диаграмма С4 для системы умный дом to-be
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "Пользователь", "Пользователь системы")
+Person(administrator, "Администратор", "Администратор системы")
+
+System(smartHouse, "Умный дом", "Система для управления умным домом")
+System(hub, "Хаб", "Центральное устройство для подключения и управления устройствами")
+
+System_Ext(device, "Устройство", "Умное устройство, подключенное к системе")
+
+Rel(administrator, smartHouse, "Добавляет устройства в систему")
+Rel(user, smartHouse, "Получает информацию об устройствах, создает сценарии, управляет устройствами")
+Rel(smartHouse, hub, "Управляет устройствами и получает данные с устройств")
+Rel(device, hub, "Отправляет данные")
+Rel(hub, device, "Управляет устройством")
+Rel(hub, device, "Автоматически находит новые устройства")
+
+@enduml

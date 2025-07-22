@@ -26,6 +26,11 @@ Alternatively, you can run Docker Compose directly:
 docker-compose up -d
 ```
 
+```bash
+docker-compose down -v
+```
+
+
 The API will be available at http://localhost:8080
 
 ### Option 2: Manual setup
