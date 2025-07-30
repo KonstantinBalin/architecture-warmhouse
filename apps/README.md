@@ -23,7 +23,7 @@ This script will:
 Alternatively, you can run Docker Compose directly:
 
 ```bash
-docker-compose up -d
+docker-compose up -d --build
 ```
 
 ```bash
