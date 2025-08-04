@@ -1,0 +1,16 @@
+@startuml
+title Контекстная диаграмма С4 для системы умный дом as-is
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "Пользователь", "Пользователь системы управления отоплением")
+Person(master, "Настройщик", "Специалист по настройке системы отопления")
+
+System(smartHouse, "Система Умный дом", "Система управления отоплением")
+System_Ext(heatingSystem, "Система отопления", "Отопительная система дома")
+
+Rel(user, smartHouse, "Включает/выключает отопление, получает информацию о температуре в доме, редактирует параметры температуры")
+Rel(smartHouse, heatingSystem, "Запрашивает данные с датчиков, получает необходимое значение температуры")
+Rel(master, heatingSystem, "Подключает датчики и настраивает систему")
+
+@enduml

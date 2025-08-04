@@ -1,0 +1,132 @@
+@startuml
+
+title Диаграмма кода для C4 для auth сервиса
+
+' Интерфейсы безопасности
+interface AuthenticationHandler {
+  + authenticate(credentials: Credentials): AuthResult
+}
+
+interface AuthorizationHandler {
+  + checkAccess(user: User, resource: Resource): boolean
+}
+
+' Основные сервисы
+class AuthController {
+  - authService: AuthService
+  + login(req: LoginRequest): ResponseEntity<AuthResponse>
+  + refreshToken(req: RefreshRequest): ResponseEntity<TokenPair>
+  + logout(): ResponseEntity<Void>
+}
+
+class AuthService {
+  - userService: UserService
+  - tokenService: TokenService
+  - auditService: AuditService
+  + loginWithPassword(email: String, password: String): AuthResponse
+  + oauthLogin(provider: OAuthProvider, code: String): AuthResponse
+  + invalidateSession(sessionId: String)
+}
+
+class UserService {
+  - userRepository: UserRepository
+  + findUserByEmail(email: String): Optional<User>
+  + createUser(userData: UserDTO): User
+  + updateUserRoles(userId: UUID, roles: Set<Role>)
+}
+
+' Токены и безопасность
+class JwtTokenService {
+  - secretKey: String
+  + generateAccessToken(user: User): String
+  + validateToken(token: String): Claims
+  + refreshToken(refreshToken: String): TokenPair
+}
+
+class BCryptEncoder {
+  + encode(rawPassword: String): String
+  + matches(rawPassword: String, encoded: String): boolean
+}
+
+' Интеграции
+class OAuth2Service {
+  - oauthClients: Map<OAuthProvider, OAuthClient>
+  + handleOAuthCallback(provider: OAuthProvider, code: String): User
+  + linkSocialAccount(user: User, provider: OAuthProvider)
+}
+
+' Модели данных
+class User {
+  - id: UUID
+  - email: String
+  - passwordHash: String
+  - roles: Set<Role>
+  - socialConnections: Map<OAuthProvider, String>
+  + isEnabled(): boolean
+}
+
+class Session {
+  - sessionId: String
+  - userId: UUID
+  - expiresAt: Instant
+  + isValid(): boolean
+}
+
+enum AuthType {
+  PASSWORD
+  OAUTH_GOOGLE
+  OAUTH_GITHUB
+}
+
+enum Role {
+  USER
+  ADMIN
+  AUDITOR
+  GUEST
+}
+
+' Связи компонентов
+AuthController --> AuthService : uses
+AuthService --> UserService : depends
+AuthService --> JwtTokenService : generates\ntokens
+AuthService --> OAuth2Service : handles\nsocial auth
+UserService --> BCryptEncoder : password\nmanagement
+OAuth2Service --> User : updates\nsocial connections
+JwtTokenService --> User : includes\nclaims
+AuthService ..> AuthenticationHandler : implements
+AuthService ..> AuthorizationHandler : implements
+
+' Стилизация
+skinparam class {
+  BackgroundColor<<interface>> #E1F5FE
+  BackgroundColor<<controller>> #C8E6C9
+  BackgroundColor<<service>> #F0F4C3
+  BackgroundColor<<enum>> #FFE0B2
+  ArrowColor #455A64
+  BorderColor #37474F
+}
+
+note top of AuthService
+<b>Ядро аутентификации</b>
+• Обработка всех типов входа
+• Управление сессиями
+• Интеграция с провайдерами
+end note
+
+note right of JwtTokenService
+<b>JWT Механизм</b>
+• HS256 подпись
+• Access Token: 15 мин
+• Refresh Token: 7 дней
+• Валидация claims
+end note
+
+note left of OAuth2Service
+<b>Поддерживаемые провайдеры</b>
+• Google OAuth2
+• GitHub
+• Facebook
+• Кастомные IDP
+end note
+
+@enduml

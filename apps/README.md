@@ -23,8 +23,13 @@ This script will:
 Alternatively, you can run Docker Compose directly:
 
 ```bash
-docker-compose up -d
+docker-compose up -d --build
 ```
+
+```bash
+docker-compose down -v
+```
+
 
 The API will be available at http://localhost:8080
 

@@ -82,8 +82,7 @@ func (h *SensorHandler) GetSensorByID(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Sensor not found"})
 		return
 	}
-
-	// If this is a temperature sensor, fetch real-time data from the temperature API
+// If this is a temperature sensor, fetch real-time data from the temperature API
 	if sensor.Type == models.Temperature {
 		tempData, err := h.TemperatureService.GetTemperatureByID(fmt.Sprintf("%d", sensor.ID))
 		if err == nil {
